@@ -1,0 +1,31 @@
+article{
+  float:left;
+  border-style: solid;
+  border-width: thin;
+}
+h1{
+  text-align: center;
+}
+
+img{
+	width: 30%;
+}
+.boton{
+	display: inline;
+	margin: auto;
+	border-style: solid;
+}
+.menu{
+	
+}
+#descripcion {
+  text-align: center;
+}
+
+aside{
+  text-align: left;
+}
+
+#imagen {
+	width: 100px;
+}
