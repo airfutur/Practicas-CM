@@ -1,0 +1,25 @@
+article{
+  float:left;
+  border-style: solid;
+  border-width: thin;
+}
+h1{
+  text-align: center;
+}
+
+img{
+	width: 30%;
+}
+#descripcion {
+  text-align: center;
+}
+
+aside{
+  border-style: solid;
+  text-align: left;
+}
+
+#contenedor{
+	width: 300px;
+
+}
