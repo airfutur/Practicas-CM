@@ -1,3 +1,6 @@
+body {
+  color: #208fb9;
+}
 article{
   float:left;
   border-style: solid;
@@ -5,6 +8,16 @@ article{
 }
 h1{
   text-align: center;
+  letter-spacing: 5px;
+  word-spacing: 20px;
+  font-family: Arial, Verdana;
+}
+p {
+  font-family: Arial, Verdana;
+}
+
+.imagen {
+  width: 300px;
 }
 
 img{
@@ -15,11 +28,14 @@ img{
 }
 
 aside{
-  border-style: solid;
   text-align: left;
+}
+#suma{
+  font-weight: bold;
+  text-decoration: underline;
 }
 
 #contenedor{
-	width: 300px;
+	width: 1000px;
 
 }
