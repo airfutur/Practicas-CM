@@ -1,4 +1,6 @@
-mixin picture(sourceImage, price)
-      article.imagen Producto
-	  img(src=sourceImage, width="200")
-	  button(text="comprar")
+mixin picture(sourceImage, price,title)
+	article Producto numero #{i+1} :
+		br
+		img(src=sourceImage, width="300").img-rounded
+		p #{price} €
+		button(text="comprar") comprar #{title}
