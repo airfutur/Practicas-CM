@@ -1,6 +1,8 @@
-mixin picture(sourceImage, price,title)
+mixin picture(producto)
 	article Producto numero #{i+1} :
 		br
-		img(src=sourceImage, width="300").img-rounded
-		p #{price} €
-		button(text="comprar") comprar #{title}
+		img(src=producto.image, width="300").img-rounded
+		p #{producto.getPrice()} €
+		br
+		p Quedan #{producto.getUnidades()} unidades de talla #{producto.getTalla()}
+		button(text="comprar") comprar producto
