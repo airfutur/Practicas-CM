@@ -3,9 +3,9 @@ include mixins/picture
 
 block content
     .jumbotron
-        h1 Benvingut a la meva botiga online!
-        a.btn.btn-primary.btn-lg(href='#', role='button') Veure les ofertes
+        h1 Novedades:
     div.row
-        - for (var i = 0; i < 9; ++i) {
-            +picture(pics[i].image, pics[i].getPrice())
+        - for (var i = 0; i < 6; ++i) {
+        div.col-md-4
+            +picture(pics[i].imagen, pics[i].price, pics[i].title)
         - }
