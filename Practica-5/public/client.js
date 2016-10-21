@@ -4,7 +4,7 @@
 $(document).ready(function(){
 
     $('.img-rounded').mouseenter(function() {
-        $(this).animate({zoom:'1.1'},'fast');
+        $(this).animate({zoom:'1.3'},'fast');
         $(this).parent().addClass("selected");
     });
     $('.img-rounded').mouseout(function() {
