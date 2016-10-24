@@ -1,7 +1,16 @@
-/**
- * Created by parallels on 10/19/16.
- */
-$( document ).ready(function() {
+var myVar = setInterval(myTimer, 1000);
+var d = 60;
+function myTimer() {
+    if (d!=0) {
+        document.getElementById("demo").innerHTML = d;
+        d-=1;
+    }
+    else {
+        document.getElementById("demo").innerHTML = "BOOM!";
+    }
+}
+/*
+$(document).ready(function() {
     var canvas = document.getElementById("canvas");
     // Obtenemos el objeto context
     var ctx = canvas.getContext("2d");
@@ -9,3 +18,4 @@ $( document ).ready(function() {
     ctx.fillStyle = "green";
     ctx.fillRect(10, 10, 100, 100);
 })
+    */
