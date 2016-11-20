@@ -1,0 +1,4 @@
+No me deja instalar el paquete socket.io, probe a copiar el directorio
+entero node_modules que joshua me paso pero al intentar probar el 
+resultado no me aparece nada en el navegador... Aunque me he revisado 
+bastante el código y teoricamente debería funcionar bien.
