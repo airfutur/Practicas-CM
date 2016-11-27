@@ -78,9 +78,9 @@ function actionOnClick () {
         res=0;
 
         game.add.text(40, 440, "RESULTADO: "+String(res), style);
-    }}
+    }
 
-    else if (llave == (11||13||14||15){
+    else if (llave == (11||13||14||15)){
         c=llave;
     }
 
