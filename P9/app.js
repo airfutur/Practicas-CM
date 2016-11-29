@@ -2,7 +2,7 @@
  * Created by parallels on 11/22/16.
  */
 var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create});
-
+ console.log("hola");
 function preload() {
 
     // game.load.spritesheet('button', 'assets/button_sprite_sheet.png', 193, 71);
@@ -26,7 +26,8 @@ function preload() {
 
 }
 
-var button;
+var button, text;
+var style = { font: "24px Arial", fill: "#000000", align: "center" };
 var a="",b="",c=0,res=0,llave="";
 
 function create() {
@@ -49,7 +50,7 @@ function create() {
 function actionOnClick () {
     llave=this.keyname;
 
-    // console.log("Tecla pulsada: "+this.keyname);
+    console.log("Tecla pulsada: "+this.keyname);
 
     if(llave==7){
 
@@ -65,8 +66,9 @@ function actionOnClick () {
         else if (c==11){
             res=Number(a)/Number(b);
         }
-        else res=Number(a);
-
+        else {
+            res=Number(a);
+        }
        game.add.text(40, 440, "RESULTADO: "+String(res), style);
 
         //Falta renderizar el resultado por pantalla en este punto
@@ -85,45 +87,86 @@ function actionOnClick () {
     }
 
     else if (llave==0){
-        if(c==0) a+=String(7);
-        else b+=String(7);
+        if(c==0) {
+            a+=String(7);
+        }
+        else {
+            b+=String(7);
+        }
     }
     else if (llave==1){
-        if(c==0) a+=String(4);
-        else b+=String(4);
+        if(c==0) {
+            a+='4';
+        }
+        else {
+            b+=String(4);
+        }
     }
     else if (llave==2){
-        if(c==0) a+=String(1);
-        else b+=String(1);
+        if(c==0) {
+            a+=String(1);
+        }
+        else {
+            b+=String(1);
+        }
     }
     else if (llave==3){
-        if(c==0) a+=String(0);
-        else b+=String(0);
+        if(c==0) {
+            a+=String(0);
+        }
+        else {
+            b+=String(0);
+        }
     }
     else if (llave==4){
-        if(c==0) a+=String(8);
-        else b+=String(8);
+        if(c==0) {
+            a+=String(8);
+        }
+        else {
+            b+=String(8);
+        }
     }
     else if (llave==5){
-        if(c==0) a+=String(5);
-        else b+=String(5);
+        if(c==0) {
+            a+=String(5);
+        }
+        else {
+            b+=String(5);
+        }
     }
     else if (llave==6){
-        if(c==0) a+=String(2);
-        else b+=String(2);
+        if(c==0) {
+            a+=String(2);
+        }
+        else {
+            b+=String(2);
+        }
     }
     else if (llave==8){
-        if(c==0) a+=String(9);
-        else b+=String(9);
+        if(c==0) {
+            a+=String(9);
+        }
+        else {
+            b+=String(9);
+        }
     }
     else if (llave==9){
-        if(c==0) a+=String(6);
-        else b+=String(6);
+        if(c==0) {
+            a+=String(6);
+        }
+        else {
+            b+=String(6);
+        }
     }
     else if (llave==10){
-        if(c==0) a+=String(3);
-        else b+=String(3);
+        if(c==0) {
+            a+=String(3);
+        }
+        else {
+            b+=String(3);
+        }
     }
+
 }
 
 
