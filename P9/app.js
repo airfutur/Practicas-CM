@@ -1,7 +1,7 @@
 /**
  * Created by parallels on 11/22/16.
  */
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create});
+var game = new Phaser.Game(360, 500, Phaser.AUTO, 'phaser-example', { preload: preload, create: create});
  console.log("hola");
 function preload() {
 
@@ -26,20 +26,21 @@ function preload() {
 
 }
 
-var button, text;
-var style = { font: "24px Arial", fill: "#000000", align: "center" };
-var a="",b="",c=0,res=0,llave="";
+var a="",b="",c=0,res=0,llave="", text, button;
 
 function create() {
 
     game.stage.backgroundColor = '#DDDDDD';
     var style = { font: "32px Arial", fill: "#ff0044", align: "center" };
+    text = game.add.text(100, 400, "", style);
 
     var n=0;
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 4; j++) {
             var key = 'boton-'+n;
-            game.add.button(i * 100, j * 100, key, actionOnClick, {keyname:n}, 0, 0, 0);
+            button = game.add.button(i * 100, j * 100, key, actionOnClick, {keyname:n}, 0, 0, 0);
+            button.events.onInputDown.add(onInputDown);
+            button.events.onInputUp.add(onInputUp);
             n++;
         }
     }
@@ -48,125 +49,99 @@ function create() {
 // Cuadro 2 para raton por encima, cuadro 1 para fuera y cuadro 0 para cuando se clic
 
 function actionOnClick () {
-    llave=this.keyname;
 
-    console.log("Tecla pulsada: "+this.keyname);
+    llave = this.keyname;
 
-    if(llave==7){
+    if (llave == 0){
+        if(c == 0) a += String(7);
+        else b += String(7);
+    }
+    else if (llave == 1){
+        if(c == 0) a += String(4);
+        else b += String(4);
+    }
+    else if (llave == 2){
+        if(c == 0) a += String(1);
+        else b += String(1);
+    }
+    else if (llave == 3){
+        if(c == 0) a += String(0);
+        else b += String(0);
+    }
+    else if (llave == 4){
+        if(c == 0) a += String(8);
+        else b += String(8);
+    }
+    else if (llave == 5){
+        if(c == 0) a += String(5);
+        else b += String(5);
+    }
+    else if (llave == 6){
+        if(c == 0) a += String(2);
+        else b += String(2);
+    }
+    else if (llave == 8){
+        if(c == 0) a += String(9);
+        else b += String(9);
+    }
+    else if (llave == 9){
+        if(c == 0) a += String(6);
+        else b += String(6);
+    }
+    else if (llave == 10){
+        if(c == 0) a += String(3);
+        else b += String(3);
+    }
 
-        if (c==13){
-            res=Number(a)+Number(b);
-        }
-        else if (c==14){
-            res=Number(a)-Number(b);
-        }
-        else if (c==15){
-            res=Number(a)*Number(b);
-        }
-        else if (c==11){
-            res=Number(a)/Number(b);
-        }
-        else {
-            res=Number(a);
-        }
-       game.add.text(40, 440, "RESULTADO: "+String(res), style);
-
-        //Falta renderizar el resultado por pantalla en este punto
-
-        res=0;
-        c=0;
-    }
-    else if (llave==12){
-        res=0;
-
-        game.add.text(40, 440, "RESULTADO: "+String(res), style);
+    else if (llave == 11 || llave == 13 || llave == 14 || llave == 15){
+        c = llave;
     }
 
-    else if (llave == (11||13||14||15)){
-        c=llave;
+    else if(llave == 7){
+
+        if (c == 13){
+            res = Number(a) + Number(b);
+        }
+        else if (c == 14){
+            res = Number(a) - Number(b);
+        }
+        else if (c == 15){
+            res = Number(a) * Number(b);
+        }
+        else if (c == 11){
+            res = Number(a) / Number(b);
+        }
+        else {
+            res = Number(a);
+        }
+
+        text.text = "Result: " + String(res);
+        a = res;
+        res = 0;
+        c = 0;
+        b = "";
+
     }
 
-    else if (llave==0){
-        if(c==0) {
-            a+=String(7);
-        }
-        else {
-            b+=String(7);
-        }
-    }
-    else if (llave==1){
-        if(c==0) {
-            a+='4';
-        }
-        else {
-            b+=String(4);
-        }
-    }
-    else if (llave==2){
-        if(c==0) {
-            a+=String(1);
-        }
-        else {
-            b+=String(1);
-        }
-    }
-    else if (llave==3){
-        if(c==0) {
-            a+=String(0);
-        }
-        else {
-            b+=String(0);
-        }
-    }
-    else if (llave==4){
-        if(c==0) {
-            a+=String(8);
-        }
-        else {
-            b+=String(8);
-        }
-    }
-    else if (llave==5){
-        if(c==0) {
-            a+=String(5);
-        }
-        else {
-            b+=String(5);
-        }
-    }
-    else if (llave==6){
-        if(c==0) {
-            a+=String(2);
-        }
-        else {
-            b+=String(2);
-        }
-    }
-    else if (llave==8){
-        if(c==0) {
-            a+=String(9);
-        }
-        else {
-            b+=String(9);
-        }
-    }
-    else if (llave==9){
-        if(c==0) {
-            a+=String(6);
-        }
-        else {
-            b+=String(6);
-        }
-    }
-    else if (llave==10){
-        if(c==0) {
-            a+=String(3);
-        }
-        else {
-            b+=String(3);
-        }
+    else {
+        res = 0;
+
+        text.text = "Result: " + String(res);
+
+        c = 0;
+        a = "";
+        b = "";
     }
 
 }
 
+function onInputUp(button) {
+
+    game.add.tween(button.scale).to({x: 1, y: 1}, 200, Phaser.Easing.Cubic.Out, true);
+}
+
+function onInputDown(button) {
+
+    game.add.tween(button.scale).to({x: 0.8, y: 0.8}, 200, Phaser.Easing.Cubic.Out, true);
+}
 
