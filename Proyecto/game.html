@@ -1,0 +1,291 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>DOOM by CS.Y.CS</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+////////////////////////////////////////////////////////////////////////////
+/////////////// CREACION DE OBJETOS QUE GESTIONAN EL DISPARO ///////////////
+////////////////////////////////////////////////////////////////////////////
+
+var Bullet = function (game, key) {
+
+    Phaser.Sprite.call(this, game, 0, 0, key);
+
+    this.texture.baseTexture.scaleMode = PIXI.scaleModes.NEAREST;
+
+    this.anchor.set(0.5);
+
+    this.checkWorldBounds = true;
+    this.outOfBoundsKill = true;
+    this.exists = false;
+
+    this.tracking = false;
+    this.scaleSpeed = 0;
+
+};
+
+Bullet.prototype = Object.create(Phaser.Sprite.prototype);
+Bullet.prototype.constructor = Bullet;
+
+// Posicion (x,y), angulo de salida, velocidad, gravedad (x,y)
+Bullet.prototype.fire = function (x, y, angle, speed, gx, gy) {
+
+    gx = gx || 0;
+    gy = gy || 0;
+
+    this.reset(x, y);
+    this.scale.set(1);
+
+    this.game.physics.arcade.velocityFromAngle(angle, speed, this.body.velocity);
+
+    this.angle = angle;
+
+    this.body.gravity.set(gx, gy);
+
+};
+
+Bullet.prototype.update = function () {
+
+    if (this.tracking)
+    {
+        this.rotation = Math.atan2(this.body.velocity.y, this.body.velocity.x);
+    }
+
+    if (this.scaleSpeed > 0)
+    {
+        this.scale.x += this.scaleSpeed;
+        this.scale.y += this.scaleSpeed;
+    }
+
+};
+
+var Weapon = {};
+
+Weapon.SingleBullet = function (game) {
+
+    Phaser.Group.call(this, game, game.world, 'Single Bullet', false, true, Phaser.Physics.ARCADE);
+
+    this.nextFire = 0;
+    this.bulletSpeed = 600;
+    this.fireRate = 100;
+
+    for (var i = 0; i < 64; i++)
+    {
+        this.add(new Bullet(game, 'bala'), true);
+    }
+
+    return this;
+
+};
+
+Weapon.SingleBullet.prototype = Object.create(Phaser.Group.prototype);
+Weapon.SingleBullet.prototype.constructor = Weapon.SingleBullet;
+
+Weapon.SingleBullet.prototype.fire = function (source) {
+
+    if (this.game.time.time < this.nextFire) { return; }
+
+    var x = source.x + 10;
+    var y = source.y + 10;
+
+    this.getFirstExists(false).fire(x, y, 0, this.bulletSpeed, 0, 0);
+
+    this.nextFire = this.game.time.time + this.fireRate;
+
+};
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+function preload() {
+
+    game.load.image('back1', 'assets/back1.png'); //Fondo del primer escenario
+    game.load.image('ground', 'assets/ground.png'); //Suelo y plataformas
+    // game.load.image('star', 'assets/star.png');
+    // game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+    game.load.spritesheet('marine', 'assets/marine.png', 53, 72, 49); // marine
+    game.load.image('bala', 'assets/bala.png');
+
+}
+
+var player;
+var combat;
+var platforms;
+var cursors;
+var dir="";
+this.weapons = [];
+this.currentWeapon = 0;
+this.weaponName = null;
+
+var stars;
+
+function create() {
+
+    // Creación de los objetos necesarios para el disparo
+    weapons.push(new Weapon.SingleBullet(this.game));
+
+    currentWeapon = 0;
+
+    //  Habilito el sistema de fisicas arcade
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+    //  Fondo de pantalla del escenario 1
+    game.add.sprite(0, 0, 'back1');
+
+    //  Creo el grupo plataformas que tendra el suelo y los dos bordes donde saltar
+    platforms = game.add.group();
+
+    // Activo las fisicas para todo objeto creado en este grupo
+    platforms.enableBody = true;
+
+    // Aqui creo el suelo
+    var ground = platforms.create(0, game.world.height - 50, 'ground');
+
+    //  Antiguo codigo del ejemplo para escalar objetos (Ya no necesario), lo dejo por si acaso
+    // ground.scale.setTo(2, 2);
+
+    //  Hago que el suelo sea un elemento fijo en el juego y no se mueva al tocarlo.
+    ground.body.immovable = true;
+
+    //  Ahora creo tres plataformas
+    var ledge = platforms.create(400, 400, 'ground');
+    ledge.body.immovable = true;
+
+    ledge = platforms.create(-300, 180, 'ground');
+    ledge.body.immovable = true;
+
+    ledge = platforms.create(700, 280, 'ground');
+    ledge.body.immovable = true;
+
+    // Añadir los sprites al jugador
+    player = game.add.sprite(32, game.world.height - 120, 'marine');
+
+    //  Hay que activar las fisicas en el jugador
+    game.physics.arcade.enable(player);
+
+    //  Aqui fijo las propiedades de la fisica del jugador, como el rebote y la gravedad.
+    player.body.bounce.y = 0.2;
+    player.body.gravity.y = 400;
+    player.body.collideWorldBounds = true;
+
+    //  Declaro las animaciones del jugador. Mover a la izquierda, derecha, saltar...
+    /* HAY QUE MODIFICARLAS!!! Se quedan en fase "beta" hasta navidad, ya que es un trabajo
+     * de photoshop, paciencia e ir probando para que empasten bien y el juego se vea "smooth" */
+    player.animations.add('left', [2], 10, true);
+    player.animations.add('right', [15], 10, true);
+
+    /*  Aqui el codigo de las estrellas que me puede ser util para entender como crear elementos
+    stars = game.add.group();
+
+    //  We will enable physics for any star that is created in this group
+    stars.enableBody = true;
+
+    //  Here we'll create 12 of them evenly spaced apart
+    for (var i = 0; i < 12; i++)
+    {
+        //  Create a star inside of the 'stars' group
+        var star = stars.create(i * 70, 0, 'star');
+
+        //  Let gravity do its thing
+        star.body.gravity.y = 300;
+
+        //  This just gives each star a slightly random bounce value
+        star.body.bounce.y = 0.7 + Math.random() * 0.2;
+    }
+    */
+    //  Controles del juego.
+    cursors = game.input.keyboard.createCursorKeys();
+    combat = game.input.keyboard.addKey(Phaser.Keyboard.A);
+
+    // Aqui creo el HUD con la vida y las balas disponibles. MODIFICAR CON IMAGENES
+    // AMPLIAR CON ARMADURA (SI HAY TIEMPO)
+    var style = { font: "32px Arial", fill: "white", align: "center" };
+    vida=100;
+    vida_text = game.add.text(game.world.width/2-200, game.world.height-36, "Health: "+vida+"%", style);
+    municion=20;
+    municion_text = game.add.text(game.world.width/2, game.world.height-36, "Ammunition: "+municion, style);
+    
+}
+
+function update() {
+
+    //  Collide the player and the stars with the platforms
+    game.physics.arcade.collide(player, platforms);
+    game.physics.arcade.collide(stars, platforms);
+
+    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+    game.physics.arcade.overlap(player, stars, collectStar, null, this);
+
+    //  Reset the players velocity (movement)
+    player.body.velocity.x = 0;
+
+
+    if (cursors.left.isDown)
+    {
+        //  Move to the left
+        player.body.velocity.x = -200;
+
+        player.animations.play('left');
+        dir='move_left';
+    }
+    else if (cursors.right.isDown)
+    {
+        //  Move to the right
+        player.body.velocity.x = 200;
+
+        player.animations.play('right');
+        dir='move_right';
+        console.log(dir);
+
+    }
+    else
+    {
+        //  Stand still
+        player.animations.stop();
+        console.log(dir);
+        if (dir=='move_left') {
+            player.frame = 40;
+        }
+        else if (dir=='move_right'){
+            player.frame = 54;
+        }
+
+    }
+
+    if (combat.isDown){
+        this.weapons[this.currentWeapon].fire(this.player);
+    }
+    
+    //  Allow the player to jump if they are touching the ground.
+    if (cursors.up.isDown && player.body.touching.down)
+    {
+        player.body.velocity.y = -350;
+    }
+
+}
+
+function collectStar (player, star) {
+    
+    // Removes the star from the screen
+    star.kill();
+
+}
+
+</script>
+
+</body>
+</html>
