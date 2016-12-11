@@ -118,11 +118,12 @@ function preload() {
     // game.load.image('star', 'assets/star.png');
     // game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
     game.load.spritesheet('marine', 'assets/marine.png', 53, 72, 49); // marine
+    game.load.spritesheet('imp', 'assets/imp.png', 41, 62, 62); // marine
     game.load.image('bala', 'assets/bala.png');
 
 }
 
-var player;
+var player,imp;
 var combat;
 var platforms;
 var cursors;
@@ -171,22 +172,47 @@ function create() {
     ledge = platforms.create(700, 280, 'ground');
     ledge.body.immovable = true;
 
-    // Añadir los sprites al jugador
+    // Añadir los sprites al jugador y a los monstruos
     player = game.add.sprite(32, game.world.height - 120, 'marine');
+    imp = game.add.sprite(500,game.world.height - 120,'imp');
 
-    //  Hay que activar las fisicas en el jugador
+    //  Hay que activar las fisicas en el jugador y en los monstruos
     game.physics.arcade.enable(player);
+    game.physics.arcade.enable(imp);
 
     //  Aqui fijo las propiedades de la fisica del jugador, como el rebote y la gravedad.
     player.body.bounce.y = 0.2;
     player.body.gravity.y = 400;
     player.body.collideWorldBounds = true;
 
-    //  Declaro las animaciones del jugador. Mover a la izquierda, derecha, saltar...
+    //Aqui fijo las fisicas de los monstruos
+    imp.body.bounce.y = 0.2;
+    imp.body.gravity.y = 400;
+    imp.body.collideWorldBounds = true;
+
+
+    //  Declaro las animaciones del jugador y monstruos. Mover a la izquierda, derecha, saltar...
     /* HAY QUE MODIFICARLAS!!! Se quedan en fase "beta" hasta navidad, ya que es un trabajo
      * de photoshop, paciencia e ir probando para que empasten bien y el juego se vea "smooth" */
     player.animations.add('left', [2], 10, true);
     player.animations.add('right', [15], 10, true);
+    imp.animations.add('left', [3], 10, true);
+    // imp.animations.add('right', [15], 10, true); VOLTEAR HORIZONTALMENTE, testearlo y aplicarlo!
+    /* CODIGO PARA VOLTEAR HORIZONTALMENTE LOS SPRITES Y QUE NO SEA NECESARIO CARGAR TANTAS IMAGENES:
+
+    // Set Anchor to the center of your sprite
+
+     yourSprite.anchor.setTo(.5,.5);
+
+     // Invert scale.x to flip left/right
+
+     yourSprite.scale.x *= -1;
+
+     // Invert scale.y to flip up/down
+
+     yourSprite.scale.y *= -1;
+    *
+    * */
 
     /*  Aqui el codigo de las estrellas que me puede ser util para entender como crear elementos
     stars = game.add.group();
@@ -215,7 +241,7 @@ function create() {
     // AMPLIAR CON ARMADURA (SI HAY TIEMPO)
     var style = { font: "32px Arial", fill: "white", align: "center" };
     vida=100;
-    vida_text = game.add.text(game.world.width/2-200, game.world.height-36, "Health: "+vida+"%", style);
+    vida_text = game.add.text(game.world.width/2-200, game.world.height-36, "Health: "+vida, style);
     municion=20;
     municion_text = game.add.text(game.world.width/2, game.world.height-36, "Ammunition: "+municion, style);
     
@@ -223,12 +249,12 @@ function create() {
 
 function update() {
 
-    //  Collide the player and the stars with the platforms
+    //  Colision del jugador, los enemigos y los potenciadores/suministros con el suelo
     game.physics.arcade.collide(player, platforms);
-    game.physics.arcade.collide(stars, platforms);
+    game.physics.arcade.collide(imp, platforms);
 
-    //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
+    //  Comprobación de si el jugador choca con un imp, en ese caso llama a la función impDamage
+    game.physics.arcade.overlap(player, imp, impDamage, null, this);
 
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
@@ -278,10 +304,10 @@ function update() {
 
 }
 
-function collectStar (player, star) {
-    
-    // Removes the star from the screen
-    star.kill();
+function impDamage (player, imp) {
+    vida-=0.1;
+    vida_text.text = "Health: "+vida.toFixed(0);
+
 
 }
 
