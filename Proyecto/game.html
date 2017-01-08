@@ -26,23 +26,26 @@ function preload() {
     game.load.spritesheet('marine', 'assets/marine.png', 53, 72, 49); // marine
     game.load.spritesheet('imp', 'assets/imp.png', 41, 62, 62); // imp
     game.load.image('bullet', 'assets/bala.png'); //bala
-    game.load.image('ammunition', 'assets/ammuniton.png'); //municion para recoger
+    game.load.image('ammunition', 'assets/ammunition.png'); //municion para recoger
     game.load.image('health', 'assets/health.png'); //vida para recoger
+    game.load.image('gameover', 'assets/gameover.png'); //vida para recoger
     game.load.audio('bso','assets/audio/bso.mp3'); // Sonido de fondo para jugar
     game.load.audio('shot','assets/audio/shot.mp3');
+    game.load.audio('reload','assets/audio/reload.mp3');
+    game.load.audio('healthsound','assets/audio/health.mp3');
 
 
 }
 
-var player,imp,fireButton,bsosound,shotsound,ammunitionpack,healthpack;
-var bullets;
+var player,imp,imp2,fireButton,bsosound,shotsound,ammunitionpack,healthpack;
+var bullets, healthsound, reloadsound;
 var bulletTime=0;
 var firingTimer=0;
 var combat;
 var platforms;
 var cursors;
 var dir="";
-var imp1health=60;
+var imp1health=60, imp2health=60;
 
 var stars;
 
@@ -65,6 +68,10 @@ function create() {
     bsosound.play();
     shotsound = game.add.audio('shot');
     shotsound.volume = 0.5;
+    healthsound = game.add.audio('healthsound');
+    reloadsound = game.add.audio('reload');
+    healthsound.volume = 0.3;
+    reloadsound.volume = 3;
 
     //  Grupo de balas
     bullets = game.add.group();
@@ -98,6 +105,7 @@ function create() {
     // Añadir los sprites al jugador y a los monstruos
     player = game.add.sprite(32, game.world.height - 120, 'marine');
     imp = game.add.sprite(500,game.world.height - 120,'imp');
+    imp2 = game.add.sprite(20,20,'imp');
 
     // Añado los packs de municion y vida
     healthpack = game.add.sprite(500,10,'health');
@@ -106,6 +114,7 @@ function create() {
     //  Hay que activar las fisicas en todos los objetos necesarios
     game.physics.arcade.enable(player);
     game.physics.arcade.enable(imp);
+    game.physics.arcade.enable(imp2);
     game.physics.arcade.enable(healthpack);
     game.physics.arcade.enable(ammunitionpack);
 
@@ -119,6 +128,10 @@ function create() {
     imp.body.bounce.y = 0.1;
     imp.body.gravity.y = 400;
     imp.body.collideWorldBounds = true;
+
+    imp2.body.bounce.y = 0.1;
+    imp2.body.gravity.y = 400;
+    imp2.body.collideWorldBounds = true;
 
     //Fisicas de los packs
     healthpack.body.bounce.y=0.2;
@@ -137,8 +150,11 @@ function create() {
     player.anchor.setTo(.5,.5);
     // player.animations.add('right', [15], 10, true);
     imp.animations.add('walking', [3], 10, true);
+    imp2.animations.add('walking', [3], 10, true);
     // imp.animations.add('atack',[4,9,34,24],10,true);
     imp.anchor.setTo(.5,.5);
+    imp2.anchor.setTo(.5,.5);
+    imp2.scale.x = -1
     // imp.animations.add('right', [15], 10, true); VOLTEAR HORIZONTALMENTE, testearlo y aplicarlo!
     /* CODIGO PARA VOLTEAR HORIZONTALMENTE LOS SPRITES Y QUE NO SEA NECESARIO CARGAR TANTAS IMAGENES:
 
@@ -177,24 +193,32 @@ function update() {
     //  Colision del jugador, los enemigos y los potenciadores/suministros con el suelo
     game.physics.arcade.collide(player, platforms);
     game.physics.arcade.collide(imp, platforms);
+    game.physics.arcade.collide(imp2, platforms);
     game.physics.arcade.collide(ammunitionpack, platforms);
     game.physics.arcade.collide(healthpack, platforms);
 
     //  Comprobación de si el jugador choca con un imp, en ese caso llama a la función impDamage
     game.physics.arcade.overlap(player, imp, impDamage, null, this);
+    game.physics.arcade.overlap(player, imp2, impDamage, null, this);
 
-    // Comprobacion de si las balas impactan contra un imp.
+    // Comprobacion de si las balas impactan contra un enemigo
     game.physics.arcade.overlap(bullets, imp, impBulletDamage, null, this);
+    game.physics.arcade.overlap(bullets, imp2, imp2BulletDamage, null, this);
 
     // Impacto contra las plataformas que elimina la bala
     game.physics.arcade.overlap(bullets, platforms, bulletImpact, null, this);
 
+    // Si el jugador se superpone a la vida, esta aumenta en 50 (Hasta max 100)
+    game.physics.arcade.overlap(player, healthpack, healthRecover, null, this);
+
+    // Impacto contra las plataformas que elimina la bala
+    game.physics.arcade.overlap(player, ammunitionpack, ammunitionRecover, null, this);
+
     //  Reset the players velocity (movement)
     player.body.velocity.x = 0;
+    imp.body.velocity.x = 0;
+    imp2.body.velocity.x = 0;
 
-    //imp.body.velocity = 0;
-    //imp.animations.stop
-    //imp.frame = 4;
 
     // Movimiento del jugador. Con los cursores movimiento y con la barra espaciadora se dispara
 
@@ -234,7 +258,7 @@ function update() {
         if (municion>0){player.frame = 27;}
         fireBullet();
     }
-    
+
     //  Allow the player to jump if they are touching the ground.
     if (cursors.up.isDown && player.body.touching.down)
     {
@@ -242,19 +266,44 @@ function update() {
         player.body.velocity.y = -550;
     }
 
-    // Inteligencia artificial del imp!!!
-    if (player.body.position.x < imp.body.position.x-30) {
-        imp.scale.x = 1;
-        imp.body.velocity.x = -120;
-        imp.animations.play('walking');
-    }
-    else if (player.body.position.x > imp.body.position.x+30) {
-        imp.scale.x = -1;
-        imp.body.velocity.x = 120;
-        imp.animations.play('walking');
-    }else{
+    // Inteligencia artificial de los imp (Enemigos)
+    if (player.body.position.y < imp.body.position.y-150) {
         imp.body.velocity.x = 0;
     }
+    else {
+        if (player.body.position.x < imp.body.position.x - 20) {
+            imp.scale.x = 1;
+            imp.body.velocity.x = -120;
+            imp.animations.play('walking');
+        }
+        else if (player.body.position.x > imp.body.position.x + 20) {
+            imp.scale.x = -1;
+            imp.body.velocity.x = 120;
+            imp.animations.play('walking');
+        } else {
+            imp.body.velocity.x = 0;
+        }
+    }
+
+    if ((player.body.position.y > 180) || (player.body.position.x > 500)) {
+        imp2.body.velocity.x = 0;
+    }
+    else {
+        if (player.body.position.x < imp2.body.position.x - 20) {
+            imp2.scale.x = 1;
+            imp2.body.velocity.x = -120;
+            imp2.animations.play('walking');
+        }
+        else if (player.body.position.x > imp2.body.position.x + 20) {
+            imp2.scale.x = -1;
+            imp2.body.velocity.x = 120;
+            imp2.animations.play('walking');
+        } else {
+            imp2.body.velocity.x = 0;
+        }
+    }
+
+
     /*if (player.body.position.y < (imp.body.position.y -40 )) {
         imp.body.velocity = 0;
         imp.animations.stop();
@@ -318,8 +367,11 @@ function impDamage (player, imp) {
     vida-=0.2;
     vida_text.text = "Health: "+vida.toFixed(0);
 
-    if (vida<0){
+    if (vida<=0){
         player.kill();
+        vida_text.text = "Health: 0";
+
+        game.add.image(game.world.width/2-128,game.world.height/2-128,'gameover');
 
     }
 
@@ -327,22 +379,58 @@ function impDamage (player, imp) {
 }
 
 function resetBullet (bullet) {
-
+8
     //  Called if the bullet goes out of the screen
     bullet.kill();
 
 }
 
-function impBulletDamage (){ // PROBLEMAS!!!
+function impBulletDamage (){
     bullet.kill();
+
+
     imp1health-=5;
 
     if (imp1health<1){imp.kill();}
 
 }
 
+function imp2BulletDamage (){
+    bullet.kill();
+
+
+    imp2health-=5;
+
+    if (imp2health<1){imp2.kill();}
+
+}
+
 function bulletImpact (bullet,platforms){
     bullet.kill();
+}
+
+function healthRecover (player,healthpack){
+    healthpack.kill();
+    healthsound.play();
+    vida+=50;
+
+    if(vida>100){
+        vida = 100;
+    }
+    vida_text.text = "Health: "+vida.toFixed(0);
+
+}
+
+function ammunitionRecover (player,ammunitionpack){
+    ammunitionpack.kill();
+    reloadsound.play();
+    municion+=30;
+
+    if(municion>60){
+        municion = 60;
+    }
+    municion_text.text = "Ammunition: "+municion.toFixed(0);
+
 }
 
 </script>
