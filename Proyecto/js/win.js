@@ -3,9 +3,12 @@
  */
 var winState = {
     create: function () {
-        var winLabel = game.add.text(80,80,'HAS GANADO!',{font:'30px Courier',fill:'#FFFFFF'});
 
-        var startLabel = game.add.text(80,300,'Pulsa w para volver al menu',{font:'30px Courier',fill:'#FFFFFF'});
+        imp1health = 60, imp2health = 60;
+
+        var winLabel = game.add.text(80,80,'YOU WIN!',{font:'30px Courier',fill:'#FFFFFF'});
+
+        var startLabel = game.add.text(80,300,'Press W to go back main menu',{font:'30px Courier',fill:'#FFFFFF'});
 
         var wkey = game.input.keyboard.addKey(Phaser.Keyboard.W);
 

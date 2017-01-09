@@ -5,10 +5,14 @@ var menuState = {
 
     create: function () {
 
-        var loadingLabel = game.add.text(80,80,'pulsa w para empezar a jugar',{font:'30px Courier',fill:'#FFFFFF'});
-        var wkey = game.input.keyboard.addKey(Phaser.Keyboard.W);
+        game.add.sprite(100,40,'menulogo');
 
-        wkey.onDown.addOnce(this.start,this);
+        button = game.add.button(250,450,'button',this.start,this);
+
+        var loadingLabel = game.add.text(85,400,'Shot with spacebar, move with arrows',{font:'30px Courier',fill:'#FFFFFF'});
+        // var wkey = game.input.keyboard.addKey(Phaser.Keyboard.W);
+
+        // wkey.onDown.addOnce(this.start,this);
 
     },
 

@@ -51,7 +51,8 @@ function impDamage (player, imp) {
         player.kill();
         vida_text.text = "Health: 0";
 
-        game.add.image(game.world.width/2-128,game.world.height/2-128,'gameover');
+        game.state.start('lose');
+
 
     }
 
@@ -214,6 +215,7 @@ var playState = {
          * de photoshop, paciencia e ir probando para que empasten bien y el juego se vea "smooth" */
         player.animations.add('walking', [11, 12, 13, 12], 7, true);
         player.anchor.setTo(.5, .5);
+        player.scale.x=-1;
         // player.animations.add('right', [15], 10, true);
         imp.animations.add('walking', [3], 10, true);
         imp2.animations.add('walking', [3], 10, true);
@@ -367,7 +369,15 @@ var playState = {
         }
 
         if ((imp1health <= 1) && (imp2health <= 1)) {
-            game.state.start('win');
+
+            door = game.add.sprite(700,220,'door');
+            game.world.bringToTop(player);
+            door.animations.add('opening', [1,2,3], 3, true); // Repasar esta animacion, no funciona
+            door.animations.play('opening');
+
+            if ((player.body.position.x > 700) && (player.body.position.y > 200)){
+                game.state.start('win');
+            }
 
         }
 
