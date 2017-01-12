@@ -1,12 +1,11 @@
 /**
- * Created by parallels on 1/8/17.
+ * Created by parallels on 1/12/17.
  */
-
-
-var playState = {
+var play3State = {
 
     create: function () {
-
+        imp1health = 60;
+        imp2health = 60;
         //  Habilito el sistema de fisicas arcade
         game.physics.startSystem(Phaser.Physics.ARCADE);
 
@@ -33,36 +32,38 @@ var playState = {
         // Aqui creo el suelo
         var ground = platforms.create(0, game.world.height - 50, 'ground');
 
-        //  Antiguo codigo del ejemplo para escalar objetos (Ya no necesario), lo dejo por si acaso
-        // ground.scale.setTo(2, 2);
-
         //  Hago que el suelo sea un elemento fijo en el juego y no se mueva al tocarlo.
         ground.body.immovable = true;
 
-        //  Ahora creo tres plataformas
-        var ledge = platforms.create(400, 400, 'ground');
+        //  Ahora creo plataformas
+        var ledge = platforms.create(200, 400, 'ground2');
         ledge.body.immovable = true;
 
-        ledge = platforms.create(-300, 180, 'ground');
+        ledge = platforms.create(530, 400, 'ground2');
         ledge.body.immovable = true;
 
-        ledge = platforms.create(700, 280, 'ground');
+        ledge = platforms.create(game.world.height/2, 300, 'ground2');
+        ledge.body.immovable = true;
+
+        ledge = platforms.create(600, 200, 'ground');
         ledge.body.immovable = true;
 
         // Añadir los sprites al jugador y a los monstruos
         player = game.add.sprite(32, game.world.height - 120, 'marine');
         imp = game.add.sprite(500, game.world.height - 120, 'imp');
-        imp2 = game.add.sprite(20, 20, 'imp');
+        imp2 = game.add.sprite(600, game.world.height - 120, 'imp');
+        imp3 = game.add.sprite(620, game.world.height - 120, 'imp');
+        imp4 = game.add.sprite(620, game.world.height - 120, 'imp');
 
         // Añado los packs de municion y vida
-        healthpack = game.add.sprite(500, 10, 'health');
-        ammunitionpack = game.add.sprite(20, 10, 'ammunition');
+        ammunitionpack = game.add.sprite(game.world.height/2+10, 200, 'ammunition');
 
         //  Hay que activar las fisicas en todos los objetos necesarios
         game.physics.arcade.enable(player);
         game.physics.arcade.enable(imp);
         game.physics.arcade.enable(imp2);
-        game.physics.arcade.enable(healthpack);
+        game.physics.arcade.enable(imp3);
+        game.physics.arcade.enable(imp4);
         game.physics.arcade.enable(ammunitionpack);
 
 
@@ -80,10 +81,14 @@ var playState = {
         imp2.body.gravity.y = 400;
         imp2.body.collideWorldBounds = true;
 
-        //Fisicas de los packs
-        healthpack.body.bounce.y = 0.2;
-        healthpack.body.gravity.y = 800;
-        healthpack.body.collideWorldBounds = true;
+        imp3.body.bounce.y = 0.1;
+        imp3.body.gravity.y = 400;
+        imp3.body.collideWorldBounds = true;
+
+        imp4.body.bounce.y = 0.1;
+        imp4.body.gravity.y = 400;
+        imp4.body.collideWorldBounds = true;
+
 
         ammunitionpack.body.bounce.y = 0.2;
         ammunitionpack.body.gravity.y = 800;
@@ -98,29 +103,20 @@ var playState = {
         player.scale.x=-1;
 
         imp.animations.add('walking', [2,7,2], 9, true);
-        imp2.animations.add('walking', [2,7,2], 9, true);
         imp.animations.add('atack', [1,6], 9, true);
+        imp2.animations.add('walking', [2,7,2], 9, true);
         imp2.animations.add('atack', [1,6], 9, true);
+        imp3.animations.add('walking', [2,7,2], 9, true);
+        imp3.animations.add('atack', [1,6], 9, true);
+        imp4.animations.add('walking', [2,7,2], 9, true);
+        imp4.animations.add('atack', [1,6], 9, true);
+
         // imp.animations.add('atack',[4,9,34,24],10,true);
         imp.anchor.setTo(.5, .5);
         imp2.anchor.setTo(.5, .5);
-        imp2.scale.x = -1
-        // imp.animations.add('right', [15], 10, true); VOLTEAR HORIZONTALMENTE, testearlo y aplicarlo!
-        /* CODIGO PARA VOLTEAR HORIZONTALMENTE LOS SPRITES Y QUE NO SEA NECESARIO CARGAR TANTAS IMAGENES:
+        imp3.anchor.setTo(.5, .5);
+        imp4.anchor.setTo(.5, .5);
 
-         // Set Anchor to the center of your sprite
-
-         yourSprite.anchor.setTo(.5,.5);
-
-         // Invert scale.x to flip left/right
-         player.scale.x*=-1;
-         yourSprite.scale.x *= -1;
-
-         // Invert scale.y to flip up/down
-
-         yourSprite.scale.y *= -1;
-         *
-         * */
 
         //  Controles del juego.
         cursors = game.input.keyboard.createCursorKeys();
@@ -129,9 +125,7 @@ var playState = {
         // Aqui creo el HUD con la vida y las balas disponibles. MODIFICAR CON IMAGENES
 
         var style = {font: "32px Arial", fill: "white", align: "center"};
-        vida = 100;
         vida_text = game.add.text(game.world.width / 2 - 200, game.world.height - 36, "Health: " + vida.toFixed(0), style);
-        municion = 50;
         municion_text = game.add.text(game.world.width / 2, game.world.height - 36, "Ammunition: " + municion.toFixed(0), style);
 
 
@@ -143,22 +137,25 @@ var playState = {
         game.physics.arcade.collide(player, platforms);
         game.physics.arcade.collide(imp, platforms);
         game.physics.arcade.collide(imp2, platforms);
+        game.physics.arcade.collide(imp3, platforms);
+        game.physics.arcade.collide(imp4, platforms);
         game.physics.arcade.collide(ammunitionpack, platforms);
-        game.physics.arcade.collide(healthpack, platforms);
 
         //  Comprobación de si el jugador choca con un imp, en ese caso llama a la función impDamage
         game.physics.arcade.overlap(player, imp, impDamage, null, this);
         game.physics.arcade.overlap(player, imp2, impDamage, null, this);
+        game.physics.arcade.overlap(player, imp3, impDamage, null, this);
+        game.physics.arcade.overlap(player, imp4, impDamage, null, this);
 
         // Comprobacion de si las balas impactan contra un enemigo
         game.physics.arcade.overlap(bullets, imp, impBulletDamage, null, this);
         game.physics.arcade.overlap(bullets, imp2, imp2BulletDamage, null, this);
+        game.physics.arcade.overlap(bullets, imp3, imp3BulletDamage, null, this);
+        game.physics.arcade.overlap(bullets, imp4, imp4BulletDamage, null, this);
 
         // Impacto contra las plataformas que elimina la bala
         game.physics.arcade.overlap(bullets, platforms, bulletImpact, null, this);
 
-        // Si el jugador se superpone a la vida, esta aumenta en 50 (Hasta max 100)
-        game.physics.arcade.overlap(player, healthpack, healthRecover, null, this);
 
         // Impacto contra las plataformas que elimina la bala
         game.physics.arcade.overlap(player, ammunitionpack, ammunitionRecover, null, this);
@@ -167,7 +164,8 @@ var playState = {
         player.body.velocity.x = 0;
         imp.body.velocity.x = 0;
         imp2.body.velocity.x = 0;
-
+        imp3.body.velocity.x = 0;
+        imp4.body.velocity.x = 0;
 
         // Movimiento del jugador. Con los cursores movimiento y con la barra espaciadora se dispara
 
@@ -214,56 +212,73 @@ var playState = {
         }
 
         // Inteligencia artificial de los imp (Enemigos)
-        if (player.body.position.y < imp.body.position.y - 150) {
+        if (player.body.position.x < imp.body.position.x - 20) {
+            imp.scale.x = 1;
+            imp.body.velocity.x = game.rnd.integerInRange(-120,-80);
+            imp.animations.play('walking');
+        }
+        else if (player.body.position.x > imp.body.position.x + 20) {
+            imp.scale.x = -1;
+            imp.body.velocity.x = game.rnd.integerInRange(80,120);
+            imp.animations.play('walking');
+        }
+        else {
             imp.body.velocity.x = 0;
             imp.animations.stop();
         }
-        else {
-            if (player.body.position.x < imp.body.position.x - 20) {
-                imp.scale.x = 1;
-                imp.body.velocity.x = -120;
-                imp.animations.play('walking');
-            }
-            else if (player.body.position.x > imp.body.position.x + 20) {
-                imp.scale.x = -1;
-                imp.body.velocity.x = 120;
-                imp.animations.play('walking');
-            } else {
-                imp.body.velocity.x = 0;
-                imp.animations.stop();
-            }
-        }
 
-        if ((player.body.position.y > 180) || (player.body.position.x > 500)) {
+
+        if (player.body.position.x < imp2.body.position.x - 20) {
+            imp2.scale.x = 1;
+            imp2.body.velocity.x = game.rnd.integerInRange(-120,-30);
+            imp2.animations.play('walking');
+        }
+        else if (player.body.position.x > imp2.body.position.x + 20) {
+            imp2.scale.x = -1;
+            imp2.body.velocity.x = game.rnd.integerInRange(20,100);;
+            imp2.animations.play('walking');
+        } else {
             imp2.body.velocity.x = 0;
             imp2.animations.stop();
-
-        }
-        else {
-            if (player.body.position.x < imp2.body.position.x - 20) {
-                imp2.scale.x = 1;
-                imp2.body.velocity.x = -120;
-                imp2.animations.play('walking');
-            }
-            else if (player.body.position.x > imp2.body.position.x + 20) {
-                imp2.scale.x = -1;
-                imp2.body.velocity.x = 120;
-                imp2.animations.play('walking');
-            } else {
-                imp2.body.velocity.x = 0;
-                imp2.animations.stop();
-            }
         }
 
-        if ((imp1health <= 1) && (imp2health <= 1)) {
+        if (player.body.position.x < imp3.body.position.x - 20) {
+            imp3.scale.x = 1;
+            imp3.body.velocity.x = game.rnd.integerInRange(-60,-40);
+            imp3.animations.play('walking');
+        }
+        else if (player.body.position.x > imp3.body.position.x + 20) {
+            imp3.scale.x = -1;
+            imp3.body.velocity.x = game.rnd.integerInRange(80,120);
+            imp3.animations.play('walking');
+        } else {
+            imp3.body.velocity.x = 0;
+            imp3.animations.stop();
+        }
 
-            door = game.add.sprite(700,220,'door');
+        if (player.body.position.x < imp4.body.position.x - 20) {
+            imp4.scale.x = 1;
+            imp4.body.velocity.x = game.rnd.integerInRange(-120,-80);
+            imp4.animations.play('walking');
+        }
+        else if (player.body.position.x > imp4.body.position.x + 20) {
+            imp4.scale.x = -1;
+            imp4.body.velocity.x = game.rnd.integerInRange(20,150);
+            imp4.animations.play('walking');
+        } else {
+            imp4.body.velocity.x = 0;
+            imp4.animations.stop();
+        }
+
+        if ((imp1health <= 1) && (imp2health <= 1) && (imp3health <= 1) && (imp4health <= 1)) {
+
+            door = game.add.sprite(700,135,'door');
             game.world.bringToTop(player);
             door.animations.add('opening', [1,2,3], 3, true); // Repasar esta animacion, no funciona
             door.animations.play('opening');
 
-            if ((player.body.position.x > 700) && (player.body.position.y > 200)){
-                game.state.start('play2');
+            if ((player.body.position.x > 700) && (player.body.position.y < 180)){
+                game.state.start('win');
             }
 
         }

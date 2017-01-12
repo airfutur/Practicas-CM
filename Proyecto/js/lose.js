@@ -4,6 +4,8 @@
 var loseState = {
     create: function () {
 
+        bsosound.stop()
+
         imp1health = 60, imp2health = 60;
 
         var winLabel = game.add.text(80,80,'you lose.... :(',{font:'30px Courier',fill:'#FFFFFF'});
